@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import React, { useEffect, useState, useRef } from "react"
+import Image from "next/image"
 import { Github, ExternalLink, FileText, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, useInView, useScroll, useTransform } from "framer-motion"
@@ -10,11 +11,11 @@ export default function Portfolio() {
   const [isDarkTheme, setIsDarkTheme] = useState(false)
   
   const projectImages = [
-    { src: "/img/book.jpg", alt: "📚 책이 있는 시간이 좋아요", span: "col-span-5", row: "row-span-1" },
-    { src: "/img/running.jpg", alt: "🏃 몸도 마음도 가벼워지는 시간", span: "col-span-4", row: "row-span-1" },
-    { src: "/img/chue.jpg", alt: "🐶 츄랑 노는 게 제일 재밌어요", span: "col-span-3", row: "row-span-1" },
-    { src: "/img/movie.jpg", alt: "🎬 좋은 영화는 언제 봐도 좋다", span: "col-span-3", row: "row-span-1" },
-    { src: "/img/travel.JPG", alt: "🌍 새로운 풍경이 주는 리프레시", span: "col-span-9", row: "row-span-1" },
+    { src: "/img/book.jpg", alt: "📚 책이 있는 시간이 좋아요", size: { width: 190, height: 320 } },
+    { src: "/img/running.jpg", alt: "🏃 몸도 마음도 가벼워지는 시간", size: { width: 190, height: 320 } },
+    { src: "/img/chue.jpg", alt: "🐶 츄랑 노는 게 제일 재밌어요", size: { width: 250, height: 320 } },
+    { src: "/img/movie.jpg", alt: "🎬 좋은 영화는 언제 봐도 좋다", size: { width: 200, height: 320 } },
+    { src: "/img/travel.JPG", alt: "🌍 새로운 풍경이 주는 리프레시", size: { width: 250, height: 320 } },
   ]
 
   useEffect(() => {
@@ -27,21 +28,17 @@ export default function Portfolio() {
       if (projectElement && workElement) {
         const projectTop = projectElement.offsetTop
         const workTop = workElement.offsetTop
-        const workBottom = workElement.offsetTop + workElement.offsetHeight
         
-      
         if (scrollPosition + 500 >= projectTop) {
           setActiveSection("project")
           setIsDarkTheme(false)
           console.log("Changed to Projects - Light theme")
         }
-      
         else if (scrollPosition + 500 >= workTop) {
           setActiveSection("work-experience")
           setIsDarkTheme(true)
           console.log("Changed to Work Experience - Dark theme")
         }
-        
         else {
           const sections = ["home", "skills", "education"]
           for (const sectionId of sections) {
@@ -49,7 +46,7 @@ export default function Portfolio() {
             if (element) {
               const offsetTop = element.offsetTop
               const offsetHeight = element.offsetHeight
-              
+
               if (scrollPosition >= offsetTop - 100 && scrollPosition < offsetTop + offsetHeight + 100) {
                 setActiveSection(sectionId)
                 setIsDarkTheme(false)
@@ -70,7 +67,7 @@ export default function Portfolio() {
     }
   }, [])
 
-  const scrollToSection = (sectionId: string) => {
+  const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)
     if (element) {
       element.scrollIntoView({ behavior: "smooth" })
@@ -175,7 +172,7 @@ export default function Portfolio() {
     "Tools & Others": ["Git/GitHub", "Figma", "Notion", "RESTful API"],
   }
 
-  const AnimatedSection = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
+  const AnimatedSection = ({ children, className = "" }) => {
     const ref = useRef(null)
     const isInView = useInView(ref, { once: true, margin: "-50px" })
 
@@ -192,54 +189,299 @@ export default function Portfolio() {
     )
   }
 
-  const ImageGrid = ({ images }: { images: Array<{ src: string; alt: string; span: string; row: string }> }) => {
-    const { scrollY } = useScroll()
+  const CircularImageItem = ({ 
+    img, 
+    index, 
+    scrollProgress, 
+    circularPos, 
+    linearPos 
+  }) => {
+    // 각 이미지마다 약간씩 다른 타이밍으로 부드러운 애니메이션
+    const startProgress = 0.2 + (index * 0.05)
+    const endProgress = 0.8 + (index * 0.02)
+    
+    // 선형에서 원형으로 변환하는 애니메이션
+    const positionX = useTransform(scrollProgress, 
+      [startProgress, endProgress], 
+      [linearPos.x, circularPos.x]
+    )
+    
+    const positionY = useTransform(scrollProgress, 
+      [startProgress, endProgress], 
+      [linearPos.y, circularPos.y]
+    )
+    
+    // 원형이 될 때 둥근 모양으로 변경
+    const borderRadius = useTransform(scrollProgress, 
+      [0.1, 0.9], 
+      [8, 50]
+    )
+    
+    // 원형 배치 시 회전 효과
+    const rotation = useTransform(scrollProgress, 
+      [0.2, 1], 
+      [0, (index % 2 === 0 ? 1 : -1) * (8 + index * 3)]
+    )
+    
+    // 원형 변환 시 살짝 크기 변화
+    const scale = useTransform(scrollProgress, 
+      [0.1, 0.9], 
+      [1, 0.98]
+    )
 
     return (
-      <div className="grid grid-cols-12 gap-4 h-[500px]">
-        {images.map((img: { src: string; alt: string; span: string; row: string }, index: number) => {
-          const yOffset = useTransform(scrollY, [0, 1000], [0, (index % 2 === 0 ? -120 : 100)])
-          const xOffset = useTransform(scrollY, [0, 1000], [0, (index % 4 === 0 ? -80 : index % 4 === 1 ? 80 : index % 4 === 2 ? -60 : 60)])
-          
-          const rotation = useTransform(scrollY, [0, 1000], [0, (index % 3 === 0 ? -8 : index % 3 === 1 ? 8 : -4)])
+      <motion.div
+        className="absolute shadow-xl overflow-hidden"
+        style={{
+          x: positionX,
+          y: positionY,
+          rotate: rotation,
+          scale,
+          borderRadius,
+          left: '50%',
+          top: '50%',
+          width: `${img.size.width}px`,
+          height: `${img.size.height}px`,
+          marginLeft: `-${img.size.width / 2}px`,
+          marginTop: `-${img.size.height / 2}px`,
+          willChange: 'transform',
+          backfaceVisibility: 'hidden'
+        }}
+        whileHover={{
+          scale: 1.05,
+          zIndex: 30,
+          transition: { duration: 0.3, ease: "easeOut" }
+        }}
+      >
+        <Image
+          src={img.src || "/placeholder.svg"}
+          alt={img.alt}
+          width={img.size.width}
+          height={img.size.height}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <p className="text-white text-sm text-center font-light px-3 leading-relaxed">
+            {img.alt}
+          </p>
+        </div>
+      </motion.div>
+    )
+  }
 
-          return (
-            <motion.div
-              key={index}
-              className={`relative overflow-hidden rounded-lg ${img.span} ${img.row} group`}
-              style={{ 
-                y: yOffset, 
-                x: xOffset,
-                rotate: rotation,
-                willChange: 'transform' as const,
-                backfaceVisibility: 'hidden' as const,
-                perspective: '1000px'
-              }}
-              whileHover={{ 
-                scale: 1.01,
-                zIndex: 10,
-                transition: { duration: 0.2, ease: "easeOut" }
-              }}
-              transition={{ duration: 0.2 }}
-            >
-              <img 
-                src={img.src || "/placeholder.svg"} 
-                alt={img.alt} 
-                className="w-full h-full object-cover" 
-                style={{ 
-                  willChange: 'transform' as const,
-                  backfaceVisibility: 'hidden' as const
-                }}
+  const CircularImageGrid = ({ images }) => {
+    const { scrollY } = useScroll()
+    const [sectionOffset, setSectionOffset] = useState(0)
+    
+    useEffect(() => {
+      // Home 섹션의 위치 찾기
+      const homeSection = document.getElementById("home")
+      if (homeSection) {
+        setSectionOffset(homeSection.offsetTop)
+      }
+    }, [])
+    
+    // Home 섹션 내에서 애니메이션 진행 - 더 긴 애니메이션 범위
+    const sectionHeight = typeof window !== 'undefined' ? window.innerHeight * 4 : 4000
+    
+    // 부드러운 스크롤 진행도 계산
+    const scrollProgress = useTransform(scrollY, 
+      [sectionOffset + (typeof window !== 'undefined' ? window.innerHeight * 0.2 : 200), sectionOffset + sectionHeight * 0.8], 
+      [0, 1]
+    )
+
+    // 중앙 텍스트가 더 자연스럽게 나타나도록
+    const centerTextOpacity = useTransform(scrollY, 
+      [sectionOffset + sectionHeight * 0.3, sectionOffset + sectionHeight * 0.6], 
+      [0, 1]
+    )
+    
+    // 원형 배치 위치 계산
+    const getCircularPosition = (index, total) => {
+      const radius = 320 // 원의 반지름
+      const angle = (index / total) * 2 * Math.PI // 각도 계산
+      
+      return {
+        x: Math.cos(angle) * radius,
+        y: Math.sin(angle) * radius
+      }
+    }
+
+    const getLinearPosition = (index, total) => {
+      const totalImagesWidth = images.reduce((sum, img) => sum + img.size.width, 0)
+      const spacing = 24 // 이미지 간격을 줄임 (40px → 24px)
+      const totalSpacing = (total - 1) * spacing // 이미지 사이 간격의 총합
+      
+      // 각 이미지의 누적 위치 계산 (첫 번째 이미지부터 시작)
+      let accumulatedWidth = -(totalImagesWidth + totalSpacing) / 2 // 중앙 정렬을 위한 시작점
+      for (let i = 0; i < index; i++) {
+        accumulatedWidth += images[i].size.width + spacing
+      }
+      
+      return {
+        x: accumulatedWidth + images[index].size.width / 2,
+        y: 0
+      }
+    }
+
+    return (
+      <div 
+        className="relative w-full flex items-center justify-center overflow-visible px-8 transition-all duration-1000 ease-out"
+        style={{ 
+          height: scrollProgress.get() > 0.3 ? '1000px' : '300px'
+        }}
+      >
+        {/* 중앙 텍스트 */}
+        <motion.div 
+          className="absolute z-20 text-center"
+          style={{ opacity: centerTextOpacity }}
+        >
+          <motion.h3 
+            className="text-5xl font-light mb-6 transition-colors duration-500 text-amber-900 dark:text-white"
+            style={{ 
+              scale: useTransform(scrollProgress, [0.3, 0.7], [0.7, 1]),
+              opacity: useTransform(scrollProgress, [0.3, 0.7], [0, 1])
+            }}
+          >
+            Creative
+            <br />
+            Developer
+          </motion.h3>
+          <motion.p 
+            className="text-lg font-light transition-colors duration-500 text-amber-800 dark:text-slate-300"
+            style={{ 
+              scale: useTransform(scrollProgress, [0.4, 0.8], [0.7, 1]),
+              opacity: useTransform(scrollProgress, [0.4, 0.8], [0, 1])
+            }}
+          >
+            기술과 감성의 균형
+          </motion.p>
+        </motion.div>
+
+        {/* 이미지들 */}
+        <div className="relative w-full h-full">
+          {images.map((img, index) => {
+            const circularPos = getCircularPosition(index, images.length)
+            const linearPos = getLinearPosition(index, images.length)
+            
+            return (
+              <CircularImageItem
+                key={index}
+                img={img}
+                index={index}
+                scrollProgress={scrollProgress}
+                circularPos={circularPos}
+                linearPos={linearPos}
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <p className="text-white text-center font-light px-4 text-sm leading-relaxed">
-                  {img.alt}
-                </p>
-              </div>
-            </motion.div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
+    )
+  }
+
+  const HomeTextContent = ({ isDarkTheme, scrollToSection }) => {
+    const { scrollY } = useScroll()
+    const [sectionOffset, setSectionOffset] = useState(0)
+    
+    useEffect(() => {
+      const homeSection = document.getElementById("home")
+      if (homeSection) {
+        setSectionOffset(homeSection.offsetTop)
+      }
+    }, [])
+
+    // 스크롤 시작 시 텍스트가 위로 사라지는 애니메이션
+    const textY = useTransform(scrollY, 
+      [sectionOffset, sectionOffset + (typeof window !== 'undefined' ? window.innerHeight * 0.3 : 300)], 
+      [0, -200]
+    )
+    
+    const textOpacity = useTransform(scrollY, 
+      [sectionOffset, sectionOffset + (typeof window !== 'undefined' ? window.innerHeight * 0.2 : 200)], 
+      [1, 0]
+    )
+
+    return (
+      <motion.div 
+        className="max-w-4xl mb-0"
+        style={{ 
+          y: textY,
+          opacity: textOpacity
+        }}
+      >
+        <motion.h1
+          className={`text-6xl lg:text-6xl font-light leading-tight mb-8 transition-colors duration-500 ${
+            isDarkTheme ? "text-white" : "text-amber-900"
+          }`}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          Frontend Developer
+        </motion.h1>
+        <motion.p
+          className={`text-xl font-light mb-6 leading-relaxed transition-colors duration-500 ${
+            isDarkTheme ? "text-slate-300" : "text-amber-800"
+          }`}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+        >
+          개발은 적절한 기술, 경험, 그리고 섬세한 감각에서 완성된다고 생각합니다.
+          <br/>사용자, 팀, 비즈니스를 이해하며
+          더 나은 결과를 만드는 
+          <br/>프론트엔드 개발자 김장겸입니다.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="mb-4"
+        >
+          <Button
+            className={`px-8 py-3 rounded-full font-light transition-colors duration-500 ${
+              isDarkTheme 
+                ? "bg-transparent border border-slate-600 text-slate-200 hover:bg-slate-700" 
+                : "bg-amber-900 hover:bg-amber-800 text-[#f5f1eb]"
+            }`}
+            onClick={() => scrollToSection("work-experience")}
+          >
+            View My Work
+            <ArrowUpRight className="ml-2 w-4 h-4" />
+          </Button>
+        </motion.div>
+      </motion.div>
+    )
+  }
+
+  const ImageSection = ({ images }) => {
+    const { scrollY } = useScroll()
+    const [sectionOffset, setSectionOffset] = useState(0)
+    
+    useEffect(() => {
+      const homeSection = document.getElementById("home")
+      if (homeSection) {
+        setSectionOffset(homeSection.offsetTop)
+      }
+    }, [])
+
+    // 텍스트가 사라지면서 이미지가 위로 올라오는 애니메이션 - 더 빠르고 많이 이동
+    const imageY = useTransform(scrollY, 
+      [sectionOffset, sectionOffset + (typeof window !== 'undefined' ? window.innerHeight * 0.2 : 200)], 
+      [0, -200]
+    )
+
+    return (
+      <motion.div
+        className="w-full max-w-none mx-auto px-4 mt-12"
+        style={{ y: imageY }}
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1 }}
+      >
+        <CircularImageGrid images={images} />
+      </motion.div>
     )
   }
 
@@ -323,67 +565,19 @@ export default function Portfolio() {
       </header>
 
       {/* Home Section */}
-      <section id="home" className="min-h-screen flex items-center justify-center px-8 relative z-10">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <motion.h1
-                className={`text-6xl lg:text-8xl font-light leading-tight mb-8 transition-colors duration-500 ${
-                  isDarkTheme ? "text-white" : "text-amber-900"
-                }`}
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                Frontend
-                <br />
-                Developer
-              </motion.h1>
-              <motion.p
-                className={`text-xl font-light mb-8 leading-relaxed transition-colors duration-500 ${
-                  isDarkTheme ? "text-slate-300" : "text-amber-800"
-                }`}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                개발은 적절한 기술, 경험, 그리고 섬세한 감각에서 완성된다고 생각합니다.
-                <br/>사용자, 팀, 비즈니스를 이해하며
-                더 나은 결과를 만드는 
-                <br/>프론트엔드 개발자 김장겸입니다.
-              </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-              >
-                <Button
-                  className={`px-8 py-3 rounded-full font-light transition-colors duration-500 ${
-                    isDarkTheme 
-                      ? "bg-transparent border border-slate-600 text-slate-200 hover:bg-slate-700" 
-                      : "bg-amber-900 hover:bg-amber-800 text-[#f5f1eb]"
-                  }`}
-                  onClick={() => scrollToSection("work-experience")}
-                >
-                  View My Work
-                  <ArrowUpRight className="ml-2 w-4 h-4" />
-                </Button>
-              </motion.div>
-            </div>
-            <motion.div
-              className="relative"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <ImageGrid images={projectImages} />
-            </motion.div>
+      <section id="home" className="relative z-10" style={{ height: '400vh' }}>
+        <div className="max-w-7xl mx-auto relative z-10 w-full h-screen flex flex-col justify-center sticky top-0 pt-40">
+          <div className="px-8">
+            <HomeTextContent isDarkTheme={isDarkTheme} scrollToSection={scrollToSection} />
+            
+            {/* 이미지 애니메이션을 전체 너비로 확장 */}
+            <ImageSection images={projectImages} />
           </div>
         </div>
       </section>
 
       {/* Work Experience Section */}
-      <section id="work-experience" className="py-32 px-8 relative z-10">
+      <section id="work-experience" className="pt-80 pb-32 px-8 relative z-10"> {/* 상단 패딩 대폭 증가 */}
         <AnimatedSection className="relative z-10">
           <div className="max-w-7xl mx-auto">
             <div className="mb-20">
@@ -611,9 +805,11 @@ export default function Portfolio() {
                 >
                   <div className="bg-white/70 backdrop-blur-sm rounded-2xl overflow-hidden border border-amber-200/50 hover:border-amber-300/50 transition-all duration-300">
                     <div className="aspect-[4/3] overflow-hidden bg-amber-50/50 flex items-center justify-center">
-                      <img
+                      <Image
                         src={project.image || "/placeholder.svg"}
                         alt={project.title}
+                        width={400}
+                        height={300}
                         className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-300 ease-out rounded-lg"
                         style={{
                           willChange: 'transform',
