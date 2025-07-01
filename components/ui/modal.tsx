@@ -27,7 +27,7 @@ export function Modal({ isOpen, onClose, children, className }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -45,20 +45,20 @@ export function Modal({ isOpen, onClose, children, className }) {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
             className={cn(
-              "relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-slate-800/95 backdrop-blur-sm border border-slate-700/50 shadow-2xl",
+              "relative w-full max-w-xs sm:max-w-lg md:max-w-2xl lg:max-w-4xl max-h-[95vh] md:max-h-[90vh] overflow-hidden rounded-lg md:rounded-xl lg:rounded-2xl bg-slate-800/95 backdrop-blur-sm border border-slate-700/50 shadow-2xl",
               className
             )}
           >
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white transition-colors duration-200"
+              className="absolute top-2 right-2 md:top-4 md:right-4 z-10 p-1.5 md:p-2 rounded-full bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 hover:text-white transition-colors duration-200"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 md:w-5 md:h-5" />
             </button>
             
             {/* Scrollable Content */}
-            <div className="overflow-y-auto max-h-[90vh] p-8">
+            <div className="overflow-y-auto max-h-[95vh] md:max-h-[90vh] p-4 md:p-6 lg:p-8">
               {children}
             </div>
           </motion.div>
