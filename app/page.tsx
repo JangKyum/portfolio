@@ -2,13 +2,17 @@
 
 import React, { useEffect, useState, useRef } from "react"
 import Image from "next/image"
-import { Github, ExternalLink, FileText, ArrowUpRight } from "lucide-react"
+import { Github, ExternalLink, FileText, ArrowUpRight, Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { motion, useInView, useScroll, useTransform } from "framer-motion"
+import { Modal } from "@/components/ui/modal"
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion"
 
 export default function Portfolio() {
   const [activeSection, setActiveSection] = useState("home")
   const [isDarkTheme, setIsDarkTheme] = useState(false)
+  const [selectedWork, setSelectedWork] = useState(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0)
   
   const projectImages = [
     { src: "/img/book.jpg", alt: "📚 책이 있는 시간이 좋아요", size: { width: 190, height: 320 } },
@@ -18,60 +22,129 @@ export default function Portfolio() {
     { src: "/img/travel.JPG", alt: "🌍 새로운 풍경이 주는 리프레시", size: { width: 250, height: 320 } },
   ]
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-    
-      const projectElement = document.getElementById("project")
-      const workElement = document.getElementById("work-experience")
-      
-      if (projectElement && workElement) {
-        const projectTop = projectElement.offsetTop
-        const workTop = workElement.offsetTop
-        
-        if (scrollPosition + 500 >= projectTop) {
-          setActiveSection("project")
-          setIsDarkTheme(false)
-          console.log("Changed to Projects - Light theme")
-        }
-        else if (scrollPosition + 500 >= workTop) {
-          setActiveSection("work-experience")
-          setIsDarkTheme(true)
-          console.log("Changed to Work Experience - Dark theme")
-        }
-        else {
-          const sections = ["home", "skills", "education"]
-          for (const sectionId of sections) {
-            const element = document.getElementById(sectionId)
-            if (element) {
-              const offsetTop = element.offsetTop
-              const offsetHeight = element.offsetHeight
+  const projects = [
+    {
+      title: "개인 블로그 플랫폼",
+      description: "Next.js 15와 TypeScript 기반의 현대적인 개인 블로그 플랫폼입니다. React Markdown을 활용한 마크다운 기반 글 작성, 실시간 미리보기, 조회수 추적, 태그 시스템을 지원합니다. Supabase를 통한 안정적인 데이터 관리와 SEO 최적화, 반응형 디자인 지원으로 최적의 사용자 경험을 제공합니다.",
+      image: "/img/jkBlog.png",
+      tech: [    "Next.js 15", 
+        "TypeScript", 
+        "React 19",
+        "Tailwind CSS", 
+        "Shadcn UI",
+        "Supabase",
+        "React Markdown",
+        "React Hook Form",
+        "Zod"],
+      link: "https://codedot-blog.vercel.app/",
+    },
+    {
+  title: "Haru Class",
+  description: "소규모 학원 및 개인 교습소 관리 웹 애플리케이션입니다. 출결 관리, 공지사항 전송, 학부모 소통을 하나의 플랫폼에서 효율적으로 처리할 수 있으며, 관리자와 학생/학부모를 위한 별도의 인터페이스를 제공합니다. Shadcn UI와 Radix UI를 활용한 모던한 디자인과 반응형 레이아웃으로 모바일 환경에 최적화되어 있으며, React Hook Form과 Zod를 통한 강력한 폼 유효성 검사를 구현했습니다.",
+  image: "/img/haru-class.png",
+  tech: [
+    "Next.js 15 (App Router)",
+    "TypeScript", 
+    "Tailwind CSS",
+    "Shadcn UI",
+    "Radix UI",
+    "React Hook Form",
+    "date-fns",
+    "Recharts",
+    "Zod"
+  ],
+  link: "https://haru-class.vercel.app/"
+},
+    {
+      title: "Resume",
+      description: "HTML5, CSS3, JavaScript 기반의 반응형 개인 Resume 웹사이트입니다. 프론트엔드 개발자로서의 경력과 기술 스택을 효과적으로 소개하며, 깔끔한 UI/UX와 모바일 최적화를 통해 전문적인 개발자 이미지를 구축합니다. CSS 변수 시스템과 미디어 쿼리를 활용한 현대적인 웹 표준을 준수합니다.",
+      image: "/img/resume.png",
+      tech: [
+        "HTML5", 
+        "CSS3", 
+        "JavaScript (ES6+)",
+        "CSS Variables",
+        "ScrollReveal",
+      ],
+      link: "https://jangkyum.github.io/resume/"
+    }
+  ]
 
-              if (scrollPosition >= offsetTop - 100 && scrollPosition < offsetTop + offsetHeight + 100) {
-                setActiveSection(sectionId)
+  useEffect(() => {
+    let ticking = false;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY
+        
+          const projectElement = document.getElementById("project")
+          const workElement = document.getElementById("work-experience")
+          
+          if (projectElement && workElement) {
+            const projectTop = projectElement.offsetTop
+            const workTop = workElement.offsetTop
+            
+            if (scrollPosition + 500 >= projectTop) {
+              if (activeSection !== "project") {
+                setActiveSection("project")
                 setIsDarkTheme(false)
-                console.log(`Changed to ${sectionId} - Light theme`)
-                break
+              }
+            }
+            else if (scrollPosition + 500 >= workTop) {
+              if (activeSection !== "work-experience") {
+                setActiveSection("work-experience")
+                setIsDarkTheme(true)
+              }
+            }
+            else {
+              const sections = ["home", "skills", "education"]
+              for (const sectionId of sections) {
+                const element = document.getElementById(sectionId)
+                if (element) {
+                  const offsetTop = element.offsetTop
+                  const offsetHeight = element.offsetHeight
+
+                  if (scrollPosition >= offsetTop - 100 && scrollPosition < offsetTop + offsetHeight + 100) {
+                    if (activeSection !== sectionId) {
+                      setActiveSection(sectionId)
+                      setIsDarkTheme(false)
+                    }
+                    break
+                  }
+                }
               }
             }
           }
-        }
+          ticking = false;
+        });
+        ticking = true;
       }
     }
 
     handleScroll()
     
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => {
       window.removeEventListener("scroll", handleScroll)
     }
-  }, [])
+  }, [activeSection])
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)
     if (element) {
       element.scrollIntoView({ behavior: "smooth" })
     }
+  }
+
+  const openWorkModal = (work) => {
+    setSelectedWork(work)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setSelectedWork(null)
   }
 
   const workExperiences = [
@@ -139,32 +212,6 @@ export default function Portfolio() {
     },
   ]
 
-  const projects = [
-    {
-      title: "개인 블로그 플랫폼",
-      description: "Next.js 15와 TypeScript 기반의 현대적인 개인 블로그 플랫폼입니다. React Markdown을 활용한 마크다운 기반 글 작성, 실시간 미리보기, 조회수 추적, 태그 시스템을 지원합니다. Supabase를 통한 안정적인 데이터 관리와 SEO 최적화, 반응형 디자인 지원으로 최적의 사용자 경험을 제공합니다.",
-      image: "/img/jkBlog.png",
-      tech: [    "Next.js 15", 
-        "TypeScript", 
-        "React 19",
-        "Tailwind CSS", 
-        "Shadcn UI",
-        "Supabase",
-        "React Markdown",
-        "React Hook Form",
-        "Zod"],
-      link: "https://codedot-blog.vercel.app/",
-    },
-    {
-      title: "날씨 정보 앱",
-      description:
-        "OpenWeather API를 활용한 실시간 날씨 정보 제공 앱입니다. 위치 기반 날씨 정보와 5일 예보를 제공합니다.",
-      image: "/placeholder.svg?height=300&width=500",
-      tech: ["React", "TypeScript", "OpenWeather API", "Styled-Components"],
-      link: "https://example.com",
-    },
-  ]
-
   const skills = {
     Languages: ["JavaScript (ES6+)", "TypeScript"],
     "Frontend Frameworks": ["React", "Next.js", "Vue.js", "Angular", "RxJS"],
@@ -196,7 +243,7 @@ export default function Portfolio() {
     circularPos, 
     linearPos 
   }) => {
-    // 각 이미지마다 약간씩 다른 타이밍으로 부드러운 애니메이션
+
     const startProgress = 0.2 + (index * 0.05)
     const endProgress = 0.8 + (index * 0.02)
     
@@ -466,7 +513,7 @@ export default function Portfolio() {
       }
     }, [])
 
-    // 텍스트가 사라지면서 이미지가 위로 올라오는 애니메이션 - 더 빠르고 많이 이동
+    // 텍스트가 사라지면서 이미지가 위로 올라오는 애니메이션
     const imageY = useTransform(scrollY, 
       [sectionOffset, sectionOffset + (typeof window !== 'undefined' ? window.innerHeight * 0.2 : 200)], 
       [0, -200]
@@ -598,175 +645,63 @@ export default function Portfolio() {
               }`}>2022.04 ~ 2025.04</p>
             </div>
 
-            <div className="space-y-12">
+            {/* Compact Cards Grid */}
+            <div className="grid md:grid-cols-2 gap-12">
               {workExperiences.map((exp, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true, margin: "-50px" }}
-                  className="group"
+                  className="group cursor-pointer"
+                  onClick={() => openWorkModal(exp)}
                 >
-                  <div className="backdrop-blur-sm rounded-2xl p-8 border bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50 transition-all duration-500">
-                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-6">
-                      <div className="flex-1">
-                        <h4 className="text-2xl font-light mb-3 text-white">{exp.title}</h4>
-                        <p className="mb-2 font-light text-slate-300">{exp.period}</p>
-                        <p className="mb-6 font-light text-slate-300">{exp.role}</p>
-                      </div>
-                      {exp.link && exp.link !== "https://example.com" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          asChild
-                          className="rounded-full bg-transparent border-slate-600 text-slate-200 hover:bg-slate-700 transition-colors duration-500"
-                        >
-                          <a href={exp.link} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            View Project
-                          </a>
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="mb-6">
-                      <h5 className="font-medium mb-4 text-slate-200">주요 성과 및 업무</h5>
-                      <ul className="space-y-2">
-                        {exp.achievements.map((achievement, i) => (
-                          <li key={i} className="font-light flex items-start text-slate-300">
-                            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                            {index === 0 && i === 0 ? (
-                              <span>
-                                정기점검 모듈 개선: 기존 수기 입력 방식으로 인한 오류를 줄이기 위해{" "}
-                                <a 
-                                  href="https://www.notion.so/CIS-2-UI-UX-1ae6aba52d458082b2afde4fcf717e6a" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  점검주기 자동 계산
-                                </a>
-                                ,{" "}
-                                <a 
-                                  href="https://www.notion.so/CIS-1ac6aba52d45809a926bc2ac0558b3c3?pvs=21" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  상태 시각화
-                                </a>
-                                {" "}기능 도입.
-                              </span>
-                            ) : index === 0 && i === 1 ? (
-                              <span>
-                                UI/UX 리팩토링:{" "}
-                                <a 
-                                  href="https://www.notion.so/CIS-UX-1b66aba52d4580ad8893d54ab82f3955" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  버튼 조건 분리 및 날짜 자동 설정
-                                </a>
-                                으로 사용자의 실수 가능성을 낮추고, 알럿/툴팁을 활용한 저장 UX 개선.
-                              </span>
-                            ) : index === 1 && i === 1 ? (
-                              <span>
-                                대용량 데이터 대응: 다양한{" "}
-                                <a 
-                                  href="https://www.notion.so/Tab-Tab-1296aba52d458011a87fe30f721d5f96?pvs=4" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  코드북 구조
-                                </a>
-                                에 따라 복잡한 통계 및 문서 자료를 시각화하고, 전체 검색 기능을 통해 정보 접근성을 향상
-                              </span>
-                            ) : index === 1 && i === 2 ? (
-                              <span>
-                                UX 개선 및 퍼블리싱:{" "}
-                                <a 
-                                  href="https://www.notion.so/12f6aba52d45805c879fe6d1905a9d83" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  Tailwind CSS 기반의 반응형 레이아웃
-                                </a>
-                                {" "}구현, 쿠키 기반 팝업 제어 및 관리자 화면의 UI를 직접 설계·개발하여 사용성 제고
-                              </span>
-                            ) : index === 1 && i === 3 ? (
-                              <span>
-                                배포 환경 구성:{" "}
-                                <a 
-                                  href="https://www.notion.so/1-with-docker-10e6aba52d4580e69a91c5c6f8b7fc84?pvs=4" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  도커
-                                </a>
-                                를 활용해 프론트엔드 애플리케이션을 이미지화하고, 사내 배포 환경에 맞게 설정·배포를 주도하여 배포 프로세스 안정화
-                              </span>
-                            ) : index === 2 && i === 0 ? (
-                              <span>
-                                <a 
-                                  href="https://www.notion.so/319fcb71ace343cdaaa86c4688f6ab62" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  규제신고센터
-                                </a>
-                                ,{" "}
-                                <a 
-                                  href="https://www.notion.so/467a848b6ed34bf7947cb721d1d66c97?pvs=4" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  프로그램 룰관리 Tree
-                                </a>
-                                {" "}등 업무 특화 UI 신규 설계/개발
-                              </span>
-                            ) : index === 2 && i === 1 ? (
-                              <span>
-                                <a 
-                                  href="https://www.notion.so/610dcbeb8f3041a1bf053a34c4171524?pvs=4" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  조건 기반 비동기 로딩
-                                </a>
-                                : 공급시기(시작일·종료일)가 입력되지 않으면 곡종 필드가 비활성화되고, 설정된 날짜를 기준으로 해당 기간 내 곡종만을 API로 호출하여 불필요한 데이터 로딩을 방지하고 초기 렌더링 성능을 개선함
-                              </span>
-                            ) : index === 2 && i === 2 ? (
-                              <span>
-                                사용자 조건에 따른{" "}
-                                <a 
-                                  href="https://www.notion.so/Button-2bc7f712b9b64e4589f25776670cbec3?pvs=4" 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
-                                >
-                                  버튼 제어 및 유효성 리팩토링
-                                </a>
-                                으로 UX 개선
-                              </span>
-                            ) : (
-                              achievement
-                            )}
-                          </li>
+                  <div className="backdrop-blur-sm rounded-2xl p-6 border bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50 hover:bg-slate-800/70 transition-all duration-300 h-full flex flex-col">
+                    <div className="flex-1">
+                      <h4 className="text-xl font-light mb-3 text-white group-hover:text-amber-400 transition-colors duration-300">{exp.title}</h4>
+                      <p className="text-sm mb-2 font-light text-slate-300">{exp.period}</p>
+                      <p className="text-sm mb-4 font-light text-slate-400 line-clamp-3">{exp.role}</p>
+                      
+                      {/* Tech tags - limited to show only first few */}
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {exp.tech.split(', ').slice(0, 3).map((tech, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-1 text-xs rounded-md font-light bg-slate-700/50 text-slate-300"
+                          >
+                            {tech}
+                          </span>
                         ))}
-                      </ul>
+                        {exp.tech.split(', ').length > 3 && (
+                          <span className="px-2 py-1 text-xs rounded-md font-light bg-slate-700/50 text-slate-300">
+                            +{exp.tech.split(', ').length - 3}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    <div>
-                      <h5 className="font-medium mb-3 text-slate-200">사용 기술</h5>
-                      <p className="font-light text-slate-300">{exp.tech}</p>
+                    {/* View Details Button */}
+                    <div className="flex items-center justify-between mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full bg-transparent border-slate-600 text-slate-200 hover:bg-slate-700 transition-colors duration-300 text-xs"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        자세히 보기
+                      </Button>
+                      {exp.link && exp.link !== "https://example.com" && (
+                        <a 
+                          href={exp.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-slate-400 hover:text-amber-400 transition-colors duration-300"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -780,73 +715,135 @@ export default function Portfolio() {
       <section id="project" className="py-32 px-8 bg-white/30 relative z-10">
         <AnimatedSection>
           <div className="max-w-7xl mx-auto">
-            <div className="mb-20">
+            <div>
               <h2 className="text-5xl font-light mb-6 text-amber-900">Featured Projects</h2>
               <div className="w-24 h-px bg-amber-900/30"></div>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-16">
-              {projects.map((project, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  whileHover={{ 
-                    y: -5,
-                    transition: { duration: 0.2, ease: "easeOut" }
-                  }}
-                  transition={{ duration: 0.6, delay: index * 0.2 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  className="group cursor-pointer"
-                  style={{
-                    willChange: 'transform',
-                    backfaceVisibility: 'hidden'
-                  }}
-                >
-                  <div className="bg-white/70 backdrop-blur-sm rounded-2xl overflow-hidden border border-amber-200/50 hover:border-amber-300/50 transition-all duration-300">
-                    <div className="aspect-[4/3] overflow-hidden bg-amber-50/50 flex items-center justify-center">
-                      <Image
-                        src={project.image || "/placeholder.svg"}
-                        alt={project.title}
-                        width={400}
-                        height={300}
-                        className="w-full h-full object-contain group-hover:scale-102 transition-transform duration-300 ease-out rounded-lg"
-                        style={{
-                          willChange: 'transform',
-                          backfaceVisibility: 'hidden'
-                        }}
-                      />
-                    </div>
-                    <div className="p-8">
-                      <h3 className="text-2xl font-light mb-4 text-amber-900">{project.title}</h3>
-                      <p className="font-light mb-6 leading-relaxed text-amber-700">{project.description}</p>
+            {/* Project Slider */}
+            <div className="relative">
+              <div className="grid lg:grid-cols-2 gap-16 items-center min-h-[600px]">
+                {/* Project Image - Left Side */}
+                <div className="relative group">
+                  <div className="aspect-[4/3] overflow-hidden bg-white/50 rounded-2xl border border-amber-200/50 shadow-xl">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={`image-${currentProjectIndex}`}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        className="w-full h-full"
+                      >
+                        <Image
+                          src={projects[currentProjectIndex].image || "/placeholder.svg"}
+                          alt={projects[currentProjectIndex].title}
+                          width={600}
+                          height={450}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ease-out"
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
 
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {project.tech.map((tech, i) => (
-                          <span
-                            key={i}
-                            className="px-3 py-1 text-sm rounded-full font-light bg-amber-100/70 text-amber-800"
-                          >
-                            {tech}
-                          </span>
-                        ))}
+                {/* Project Info - Right Side */}
+                <div className="space-y-8">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`content-${currentProjectIndex}`}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                      className="space-y-8"
+                    >
+                      <div>
+                        <h3 className="text-4xl font-light mb-6 text-amber-900">
+                          {projects[currentProjectIndex].title}
+                        </h3>
+                        <p className="text-lg font-light leading-relaxed text-amber-700 mb-8">
+                          {projects[currentProjectIndex].description}
+                        </p>
                       </div>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        className="rounded-full bg-transparent border-amber-300 text-amber-800 hover:bg-amber-100 transition-colors duration-300"
-                      >
-                        <a href={project.link} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          View Project
-                        </a>
-                      </Button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+                      {/* Technologies */}
+                      <div className="space-y-4">
+                        <h4 className="text-xl font-medium text-amber-900">사용 기술</h4>
+                        <div className="flex flex-wrap gap-3">
+                          {projects[currentProjectIndex].tech.map((tech, i) => (
+                            <motion.span
+                              key={`${currentProjectIndex}-${tech}-${i}`}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.3, delay: i * 0.05 }}
+                              className="px-4 py-2 text-sm rounded-full font-light bg-amber-100/70 text-amber-800 border border-amber-200/50"
+                            >
+                              {tech}
+                            </motion.span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-4">
+                        <Button
+                          variant="outline"
+                          asChild
+                          className="rounded-full border-amber-300 text-amber-800 hover:bg-amber-100 px-6 py-3"
+                        >
+                          <a href={projects[currentProjectIndex].link} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            프로젝트 보기
+                          </a>
+                        </Button>
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Navigation Arrows */}
+              <div className="flex justify-center items-center gap-8">
+                <Button
+                  onClick={() => {
+                    setCurrentProjectIndex((prev) => (prev - 1 + projects.length) % projects.length)
+                  }}
+                  variant="outline"
+                  className="rounded-full w-12 h-12 border-amber-300 text-amber-800 hover:bg-amber-100 transition-colors duration-300"
+                  disabled={projects.length <= 1}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </Button>
+
+                {/* Project Indicators */}
+                <div className="flex gap-3">
+                  {projects.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setCurrentProjectIndex(index)
+                      }}
+                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        index === currentProjectIndex
+                          ? "bg-amber-800 scale-125"
+                          : "bg-amber-300 hover:bg-amber-500"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <Button
+                  onClick={() => {
+                    setCurrentProjectIndex((prev) => (prev + 1) % projects.length)
+                  }}
+                  variant="outline"
+                  className="rounded-full w-12 h-12 border-amber-300 text-amber-800 hover:bg-amber-100 transition-colors duration-300"
+                  disabled={projects.length <= 1}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </Button>
+              </div>
             </div>
           </div>
         </AnimatedSection>
@@ -858,7 +855,7 @@ export default function Portfolio() {
           <motion.div 
             className="mb-20"
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: false, margin: "-100px" }}
           >
@@ -871,25 +868,44 @@ export default function Portfolio() {
               <motion.div
                 key={category}
                 initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: false, margin: "-150px" }}
                 className="bg-white/30 backdrop-blur-sm rounded-xl p-6 border border-amber-200/30"
               >
-                <h3 className="text-xl font-light text-amber-900 mb-6">{category}</h3>
-                <div className="space-y-3">
-                  {skillList.map((skill, i) => (
-                    <motion.div 
-                      key={i} 
-                      className="text-amber-700 font-light"
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: (index * 0.1) + (i * 0.05) }}
-                      viewport={{ once: false, margin: "-150px" }}
-                    >
-                      {skill}
-                    </motion.div>
-                  ))}
+                <h3 className="text-xl font-light text-amber-900 mb-6 text-center">{category}</h3>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {skillList.map((skill, i) => {
+                    // 자연스러운 등장 딜레이
+                    const animationDelay = (index * 0.1) + (i * 0.08) + Math.random() * 0.2;
+                    
+                    return (
+                      <motion.div 
+                        key={i} 
+                        className="px-5 py-2.5 bg-white/50 backdrop-blur-sm rounded-full border border-amber-300/50 text-amber-800 font-light cursor-default text-sm shadow-sm"
+                        initial={{ 
+                          opacity: 0, 
+                          scale: 0.6,
+                          y: 20
+                        }}
+                        whileInView={{ 
+                          opacity: 1, 
+                          scale: 1,
+                          y: 0
+                        }}
+                        viewport={{ once: false, margin: "-50px" }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 120,
+                          damping: 20,
+                          mass: 0.5,
+                          delay: animationDelay
+                        }}
+                      >
+                        {skill}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.div>
             ))}
@@ -903,7 +919,7 @@ export default function Portfolio() {
           <motion.div 
             className="mb-20"
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: false, margin: "-100px" }}
           >
@@ -915,7 +931,7 @@ export default function Portfolio() {
             <motion.div 
               className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-amber-200/50"
               initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: false, margin: "-100px" }}
             >
@@ -932,7 +948,7 @@ export default function Portfolio() {
                     key={i}
                     className="text-amber-700 font-light flex items-start"
                     initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.2 + (i * 0.1) }}
                     viewport={{ once: false, margin: "-100px" }}
                   >
@@ -946,7 +962,7 @@ export default function Portfolio() {
             <motion.div 
               className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-amber-200/50"
               initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: false, margin: "-100px" }}
             >
@@ -957,7 +973,7 @@ export default function Portfolio() {
                 <motion.li 
                   className="text-amber-700 font-light flex items-start"
                   initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.4 }}
                   viewport={{ once: false, margin: "-100px" }}
                 >
@@ -974,16 +990,17 @@ export default function Portfolio() {
       <footer className="py-16 px-8 bg-amber-900 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-center space-x-8 mb-8">
+          <a href="https://github.com/jangkyum" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-[#f5f1eb]/70 hover:text-[#f5f1eb]">
+    <Github className="w-5 h-5" />
+    <span className="text-sm">Main GitHub</span>
+  </a>
+  <a href="https://github.com/codedot28" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-[#f5f1eb]/50 hover:text-[#f5f1eb]">
+    <Github className="w-5 h-5" />
+    <span className="text-sm">Past Projects</span>
+  </a>
+            
             <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#f5f1eb]/70 hover:text-[#f5f1eb] transition-colors"
-            >
-              <Github className="w-6 h-6" />
-            </a>
-            <a
-              href="https://blog.example.com"
+              href="https://codedot-blog.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#f5f1eb]/70 hover:text-[#f5f1eb] transition-colors"
@@ -991,7 +1008,7 @@ export default function Portfolio() {
               <FileText className="w-6 h-6" />
             </a>
             <a
-              href="https://notion.so"
+              href="https://www.notion.so/Develop-List-43a42ab9966f4e068f57058d7b50b725"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#f5f1eb]/70 hover:text-[#f5f1eb] transition-colors"
@@ -1004,6 +1021,191 @@ export default function Portfolio() {
           <div className="text-center text-[#f5f1eb]/50 font-light">© 2025 KIM JANGKYUM. All rights reserved.</div>
         </div>
       </footer>
+
+      {/* Modal for Work Experience Details */}
+      {selectedWork && (
+        <Modal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+        >
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start">
+              <div className="flex-1">
+                <h3 className="text-3xl font-light mb-3 text-white">{selectedWork.title}</h3>
+                <p className="mb-2 font-light text-slate-300">{selectedWork.period}</p>
+                <p className="mb-6 font-light text-slate-300">{selectedWork.role}</p>
+              </div>
+              {selectedWork.link && selectedWork.link !== "https://example.com" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="rounded-full bg-transparent border-slate-600 text-slate-200 hover:bg-slate-700 transition-colors duration-500"
+                >
+                  <a href={selectedWork.link} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View Project
+                  </a>
+                </Button>
+              )}
+            </div>
+
+            {/* Achievements */}
+            <div className="space-y-6">
+              <h4 className="text-xl font-medium text-slate-200">주요 성과 및 업무</h4>
+              <ul className="space-y-4">
+                {selectedWork.achievements.map((achievement, i) => (
+                  <li key={i} className="font-light flex items-start text-slate-300">
+                    <span className="w-2 h-2 bg-amber-400 rounded-full mt-2 mr-4 flex-shrink-0"></span>
+                    <span className="leading-relaxed">
+                      {/* CIS 프로젝트 특별 링크 처리 */}
+                      {selectedWork.title === "CIS(CywellSystem Information System)" && i === 0 ? (
+                        <span>
+                          정기점검 모듈 개선: 기존 수기 입력 방식으로 인한 오류를 줄이기 위해{" "}
+                          <a 
+                            href="https://www.notion.so/CIS-2-UI-UX-1ae6aba52d458082b2afde4fcf717e6a" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            점검주기 자동 계산
+                          </a>
+                          ,{" "}
+                          <a 
+                            href="https://www.notion.so/CIS-1ac6aba52d45809a926bc2ac0558b3c3?pvs=21" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            상태 시각화
+                          </a>
+                          {" "}기능 도입.
+                        </span>
+                      ) : selectedWork.title === "CIS(CywellSystem Information System)" && i === 1 ? (
+                        <span>
+                          UI/UX 리팩토링:{" "}
+                          <a 
+                            href="https://www.notion.so/CIS-UX-1b66aba52d4580ad8893d54ab82f3955" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            버튼 조건 분리 및 날짜 자동 설정
+                          </a>
+                          으로 사용자의 실수 가능성을 낮추고, 알럿/툴팁을 활용한 저장 UX 개선.
+                        </span>
+                      ) : selectedWork.title === "KICE(교육데이터 플랫폼)" && i === 1 ? (
+                        <span>
+                          대용량 데이터 대응: 다양한{" "}
+                          <a 
+                            href="https://www.notion.so/Tab-Tab-1296aba52d458011a87fe30f721d5f96?pvs=4" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            코드북 구조
+                          </a>
+                          에 따라 복잡한 통계 및 문서 자료를 시각화하고, 전체 검색 기능을 통해 정보 접근성을 향상
+                        </span>
+                      ) : selectedWork.title === "KICE(교육데이터 플랫폼)" && i === 2 ? (
+                        <span>
+                          UX 개선 및 퍼블리싱:{" "}
+                          <a 
+                            href="https://www.notion.so/12f6aba52d45805c879fe6d1905a9d83" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            Tailwind CSS 기반의 반응형 레이아웃
+                          </a>
+                          {" "}구현, 쿠키 기반 팝업 제어 및 관리자 화면의 UI를 직접 설계·개발하여 사용성 제고
+                        </span>
+                      ) : selectedWork.title === "KICE(교육데이터 플랫폼)" && i === 3 ? (
+                        <span>
+                          배포 환경 구성:{" "}
+                          <a 
+                            href="https://www.notion.so/1-with-docker-10e6aba52d4580e69a91c5c6f8b7fc84?pvs=4" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            도커
+                          </a>
+                          를 활용해 프론트엔드 애플리케이션을 이미지화하고, 사내 배포 환경에 맞게 설정·배포를 주도하여 배포 프로세스 안정화
+                        </span>
+                      ) : selectedWork.title === "한국쌀가공식품협회(공급관리시스템)" && i === 0 ? (
+                        <span>
+                          <a 
+                            href="https://www.notion.so/319fcb71ace343cdaaa86c4688f6ab62" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            규제신고센터
+                          </a>
+                          ,{" "}
+                          <a 
+                            href="https://www.notion.so/467a848b6ed34bf7947cb721d1d66c97?pvs=4" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            프로그램 룰관리 Tree
+                          </a>
+                          {" "}등 업무 특화 UI 신규 설계/개발
+                        </span>
+                      ) : selectedWork.title === "한국쌀가공식품협회(공급관리시스템)" && i === 1 ? (
+                        <span>
+                          <a 
+                            href="https://www.notion.so/610dcbeb8f3041a1bf053a34c4171524?pvs=4" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            조건 기반 비동기 로딩
+                          </a>
+                          : 공급시기(시작일·종료일)가 입력되지 않으면 곡종 필드가 비활성화되고, 설정된 날짜를 기준으로 해당 기간 내 곡종만을 API로 호출하여 불필요한 데이터 로딩을 방지하고 초기 렌더링 성능을 개선함
+                        </span>
+                      ) : selectedWork.title === "한국쌀가공식품협회(공급관리시스템)" && i === 2 ? (
+                        <span>
+                          사용자 조건에 따른{" "}
+                          <a 
+                            href="https://www.notion.so/Button-2bc7f712b9b64e4589f25776670cbec3?pvs=4" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-amber-400 hover:text-amber-300 underline transition-colors duration-200"
+                          >
+                            버튼 제어 및 유효성 리팩토링
+                          </a>
+                          으로 UX 개선
+                        </span>
+                      ) : (
+                        achievement
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Technologies */}
+            <div className="space-y-4">
+              <h4 className="text-xl font-medium text-slate-200">사용 기술</h4>
+              <div className="flex flex-wrap gap-2">
+                {selectedWork.tech.split(', ').map((tech, i) => (
+                  <span
+                    key={i}
+                    className="px-3 py-2 text-sm rounded-lg font-light bg-slate-700/50 text-slate-300 border border-slate-600/30"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }
