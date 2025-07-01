@@ -17,7 +17,7 @@ export default function Portfolio() {
   const projectImages = [
     { src: "/img/book.jpg", alt: "📚 책이 있는 시간이 좋아요", size: { width: 190, height: 320 } },
     { src: "/img/running.jpg", alt: "🏃 몸도 마음도 가벼워지는 시간", size: { width: 190, height: 320 } },
-    { src: "/img/chue.jpg", alt: "🐶 츄랑 노는 게 제일 재밌어요", size: { width: 250, height: 320 } },
+    { src: "/img/chue.JPG", alt: "🐶 츄랑 노는 게 제일 재밌어요", size: { width: 250, height: 320 } },
     { src: "/img/movie.jpg", alt: "🎬 좋은 영화는 언제 봐도 좋다", size: { width: 200, height: 320 } },
     { src: "/img/travel.JPG", alt: "🌍 새로운 풍경이 주는 리프레시", size: { width: 250, height: 320 } },
   ]
@@ -26,7 +26,7 @@ export default function Portfolio() {
     {
       title: "개인 블로그 플랫폼",
       description: "Next.js 15와 TypeScript 기반의 현대적인 개인 블로그 플랫폼입니다. React Markdown을 활용한 마크다운 기반 글 작성, 실시간 미리보기, 조회수 추적, 태그 시스템을 지원합니다. Supabase를 통한 안정적인 데이터 관리와 SEO 최적화, 반응형 디자인 지원으로 최적의 사용자 경험을 제공합니다.",
-      image: "/img/jkBlog.png",
+      image: "/img/jkblog.png",
       tech: [    "Next.js 15", 
         "TypeScript", 
         "React 19",
