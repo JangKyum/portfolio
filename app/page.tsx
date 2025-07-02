@@ -243,14 +243,15 @@ export default function Portfolio() {
     circularPos, 
     linearPos,
     isMobile,
-    isTablet
+    isTablet,
+    isDarkTheme
   }) => {
-    // 반응형에 따른 타이밍 조정 - 깜빡거림 방지를 위해 범위 확장
+    // 반응형에 따른 타이밍 조정 - 이미지가 더 오래 보이도록 범위 확장
     const baseStartProgress = 0.1 + (index * 0.01)  
-    const baseEndProgress = isMobile ? 0.7 + (index * 0.01) : isTablet ? 0.75 + (index * 0.01) : 0.8 + (index * 0.01)
+    const baseEndProgress = isMobile ? 0.5 + (index * 0.01) : isTablet ? 0.55 + (index * 0.01) : 0.6 + (index * 0.01)
     
     // 반응형 크기 조정
-    const scaleFactor = isMobile ? 0.55 : isTablet ? 0.7 : 1
+    const scaleFactor = isMobile ? 0.45 : isTablet ? 0.7 : 1
     const adjustedWidth = img.size.width * scaleFactor
     const adjustedHeight = img.size.height * scaleFactor
     
@@ -265,21 +266,21 @@ export default function Portfolio() {
       [linearPos.y, circularPos.y]
     )
     
-    // 투명도 제어로 깜빡거림 방지
+    // 투명도 제어 - 이미지가 완전히 흩어진 후에도 더 오래 보이도록 조정
     const opacity = useTransform(scrollProgress, 
-      [0, 0.05, baseEndProgress + 0.1, 0.95, 1], 
+      [0, 0.05, 0.8, 0.95, 1], 
       [1, 1, 1, 0.8, 0]
     )
     
     // 부드러운 스케일 애니메이션
     const scale = useTransform(scrollProgress, 
-      [0, 0.8, 1], 
+      [0, 0.9, 1], 
       [1, 0.98, 0.95]
     )
 
     return (
       <motion.div
-        className="absolute shadow-lg overflow-hidden rounded-lg"
+        className="absolute"
         style={{
           x: positionX,
           y: positionY,
@@ -287,37 +288,53 @@ export default function Portfolio() {
           opacity,
           left: '50%',
           top: '50%',
-          width: `${adjustedWidth}px`,
-          height: `${adjustedHeight}px`,
           marginLeft: `-${adjustedWidth / 2}px`,
           marginTop: `-${adjustedHeight / 2}px`,
           willChange: 'transform'
         }}
-        whileHover={{
-          scale: isMobile ? 1.02 : 1.05,
-          zIndex: 30,
-          transition: { duration: 0.2, ease: "easeOut" }
-        }}
       >
-        <Image
-          src={img.src || "/placeholder.svg"}
-          alt={img.alt}
-          width={adjustedWidth}
-          height={adjustedHeight}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-          <p className={`text-white text-center font-light px-3 leading-relaxed ${
+        {/* 이미지 */}
+        <motion.div
+          className="shadow-lg overflow-hidden rounded-lg"
+          style={{
+            width: `${adjustedWidth}px`,
+            height: `${adjustedHeight}px`,
+          }}
+          whileHover={{
+            scale: isMobile ? 1.02 : 1.05,
+            zIndex: 30,
+            transition: { duration: 0.2, ease: "easeOut" }
+          }}
+        >
+          <Image
+            src={img.src || "/placeholder.svg"}
+            alt={img.alt}
+            width={adjustedWidth}
+            height={adjustedHeight}
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+        
+        {/* 이미지 하단 텍스트 - 항상 표시 */}
+        <motion.div
+          className="absolute w-full text-center"
+          style={{
+            top: `${adjustedHeight + (isMobile ? 12 : 8)}px`,
+          }}
+        >
+          <p className={`text-center font-light leading-relaxed transition-colors duration-500 ${
+            isDarkTheme ? "text-slate-300" : "text-amber-800"
+          } ${
             isMobile ? 'text-xs' : isTablet ? 'text-sm' : 'text-sm'
           }`}>
             {img.alt}
           </p>
-        </div>
+        </motion.div>
       </motion.div>
     )
   }
 
-  const CircularImageGrid = ({ images }) => {
+  const CircularImageGrid = ({ images, isDarkTheme }) => {
     const { scrollY } = useScroll()
     const [sectionOffset, setSectionOffset] = useState(0)
     const [isMobile, setIsMobile] = useState(false)
@@ -342,8 +359,8 @@ export default function Portfolio() {
       return () => window.removeEventListener('resize', checkResponsive)
     }, [])
     
-    // 더 긴 애니메이션 범위로 부드러운 전환
-    const sectionHeight = typeof window !== 'undefined' ? window.innerHeight * 2 : 2000
+    // 더 긴 애니메이션 범위로 부드러운 전환 - 범위를 더 늘림
+    const sectionHeight = typeof window !== 'undefined' ? window.innerHeight * 2.5 : 2500
     
     // 부드러운 스크롤 진행도 계산 - 범위 확장
     const scrollProgress = useTransform(scrollY, 
@@ -353,20 +370,20 @@ export default function Portfolio() {
 
     // 중앙 텍스트 애니메이션 - 더 늦게 나타나도록 조정
     const centerTextOpacity = useTransform(scrollY, 
-      [sectionOffset + sectionHeight * 0.3, sectionOffset + sectionHeight * 0.6], 
+      [sectionOffset + sectionHeight * 0.4, sectionOffset + sectionHeight * 0.7], 
       [0, 1]
     )
     
     // 흩어진 배치 위치 계산 - 반응형 대응
-    const getScatteredPosition = (index, total) => {
+    const getScatteredPosition = (index) => {
       // 모바일에서는 더 안전하고 균형잡힌 배치
       if (isMobile) {
         const mobileScatteredPositions = [
-          { x: -140, y: 120 },      // 왼쪽 (더 안전한 위치로 조정)
-          { x: 150, y: -80 },     // 오른쪽 위 (화면 밖으로 나가지 않도록 조정)
-          { x: -150, y: -80 },    // 왼쪽 위 (화면 밖으로 나가지 않도록 조정)
-          { x: 140, y: 120 },       // 오른쪽 (더 안전한 위치로 조정)
-          { x: 0, y: -80 },       // 중앙 위 (더 안전한 위치로 조정)
+          { x: -120, y: 150 },      // 왼쪽 (더 중앙 가까이)
+          { x: 120, y: -70 },       // 오른쪽 위 (더 중앙 가까이)
+          { x: -120, y: -70 },      // 왼쪽 위 (더 중앙 가까이)
+          { x: 120, y: 150 },       // 오른쪽 (더 중앙 가까이)
+          { x: 0, y: -70 },         // 중앙 위 (더 중앙 가까이)
         ]
         return mobileScatteredPositions[index] || { x: 0, y: 0 }
       }
@@ -394,9 +411,9 @@ export default function Portfolio() {
       return positions[index] || { x: 0, y: 0 }
     }
 
-    const getLinearPosition = (index, total) => {
+    const getLinearPosition = (index) => {
       // 반응형 이미지 크기 조정
-      const scaleFactor = isMobile ? 0.55 : isTablet ? 0.7 : 1
+      const scaleFactor = isMobile ? 0.45 : isTablet ? 0.7 : 1
       const adjustedImages = images.map(img => ({
         ...img,
         size: {
@@ -405,24 +422,24 @@ export default function Portfolio() {
         }
       }))
       
-      // 모바일에서는 더 가지런한 2x3 그리드 (중앙 정렬)
+      // 모바일에서는 더 가지런한 2x3 그리드 (중앙 정렬) - 텍스트 겹침 방지를 위해 간격 대폭 증가
       if (isMobile) {
         const imageWidth = adjustedImages[index].size.width
         const imageHeight = adjustedImages[index].size.height
-        const mobileHorizontalSpacing = 12  // 간격 약간 증가
-        const mobileVerticalSpacing = 20    // 간격 약간 증가
+        const mobileHorizontalSpacing = 8   // 가로 간격 줄임 (12 → 8)
+        const mobileVerticalSpacing = 45    // 세로 간격 약간 줄임 (50 → 45)
         
-        // 첫 번째 행: 3개 이미지를 중앙 정렬
+        // 첫 번째 행: 3개 이미지를 중앙 정렬 - 모바일 최적화
         // 두 번째 행: 2개 이미지를 중앙 정렬
         const mobileGridPositions = [
-          // 첫 번째 행 (3개) - 완전히 중앙 정렬
-          { x: -imageWidth - mobileHorizontalSpacing, y: -imageHeight/2 - mobileVerticalSpacing/2 },  // 왼쪽
-          { x: 0, y: -imageHeight/2 - mobileVerticalSpacing/2 },                                      // 중앙
-          { x: imageWidth + mobileHorizontalSpacing, y: -imageHeight/2 - mobileVerticalSpacing/2 },   // 오른쪽
+          // 첫 번째 행 (3개) - 더 중앙에 가깝게 배치
+          { x: -imageWidth - mobileHorizontalSpacing, y: -imageHeight/2 - mobileVerticalSpacing/2 - 10 },  // 왼쪽
+          { x: 0, y: -imageHeight/2 - mobileVerticalSpacing/2 - 10 },                                      // 중앙
+          { x: imageWidth + mobileHorizontalSpacing, y: -imageHeight/2 - mobileVerticalSpacing/2 - 10 },   // 오른쪽
           
-          // 두 번째 행 (2개) - 중앙 정렬
-          { x: -imageWidth/2 - mobileHorizontalSpacing/2, y: imageHeight/2 + mobileVerticalSpacing/2 }, // 왼쪽
-          { x: imageWidth/2 + mobileHorizontalSpacing/2, y: imageHeight/2 + mobileVerticalSpacing/2 },  // 오른쪽
+          // 두 번째 행 (2개) - 더 중앙에 가깝게 배치
+          { x: -imageWidth/2 - mobileHorizontalSpacing/2, y: imageHeight/2 + mobileVerticalSpacing/2 + 15 }, // 왼쪽
+          { x: imageWidth/2 + mobileHorizontalSpacing/2, y: imageHeight/2 + mobileVerticalSpacing/2 + 15 },  // 오른쪽
         ]
         return mobileGridPositions[index] || { x: 0, y: 0 }
       }
@@ -435,22 +452,22 @@ export default function Portfolio() {
         const tabletVerticalSpacing = 35    // 간격 조정
         
         const tabletGridPositions = [
-          // 첫 번째 행 (3개) - 완전히 중앙 정렬
-          { x: -imageWidth - tabletHorizontalSpacing, y: -imageHeight/2 - tabletVerticalSpacing/2 },   // 왼쪽
-          { x: 0, y: -imageHeight/2 - tabletVerticalSpacing/2 },                                       // 중앙
-          { x: imageWidth + tabletHorizontalSpacing, y: -imageHeight/2 - tabletVerticalSpacing/2 },    // 오른쪽
+          // 첫 번째 행 (3개) - 완전히 중앙 정렬, 위로 이동
+          { x: -imageWidth - tabletHorizontalSpacing, y: -imageHeight/2 - tabletVerticalSpacing/2 - 20 },   // 왼쪽
+          { x: 0, y: -imageHeight/2 - tabletVerticalSpacing/2 - 20 },                                       // 중앙
+          { x: imageWidth + tabletHorizontalSpacing, y: -imageHeight/2 - tabletVerticalSpacing/2 - 20 },    // 오른쪽
           
-          // 두 번째 행 (2개) - 중앙 정렬
-          { x: -imageWidth/2 - tabletHorizontalSpacing/2, y: imageHeight/2 + tabletVerticalSpacing/2 }, // 왼쪽
-          { x: imageWidth/2 + tabletHorizontalSpacing/2, y: imageHeight/2 + tabletVerticalSpacing/2 },  // 오른쪽
+          // 두 번째 행 (2개) - 중앙 정렬, 위로 이동
+          { x: -imageWidth/2 - tabletHorizontalSpacing/2, y: imageHeight/2 + tabletVerticalSpacing/2 - 20 }, // 왼쪽
+          { x: imageWidth/2 + tabletHorizontalSpacing/2, y: imageHeight/2 + tabletVerticalSpacing/2 - 20 },  // 오른쪽
         ]
         return tabletGridPositions[index] || { x: 0, y: 0 }
       }
       
-      // 데스크톱은 기존 선형 배치
+      // 데스크톱은 기존 선형 배치 - 위로 이동
       const totalImagesWidth = adjustedImages.reduce((sum, img) => sum + img.size.width, 0)
       const desktopSpacing = 20
-      const totalSpacing = (total - 1) * desktopSpacing
+      const totalSpacing = (images.length - 1) * desktopSpacing
       
       let accumulatedWidth = -(totalImagesWidth + totalSpacing) / 2
       for (let i = 0; i < index; i++) {
@@ -459,15 +476,18 @@ export default function Portfolio() {
       
       return {
         x: accumulatedWidth + adjustedImages[index].size.width / 2,
-        y: 0
+        y: -20  // 데스크톱에서도 위로 이동
       }
     }
 
     return (
       <div 
-        className="relative w-full flex items-center justify-center overflow-hidden px-4 md:px-6 lg:px-8"
+        className="relative w-full flex items-center justify-center"
         style={{ 
-          height: isMobile ? '500px' : isTablet ? '540px' : '600px'
+          height: isMobile ? '650px' : isTablet ? '540px' : '600px',
+          overflow: isMobile ? 'visible' : 'hidden',
+          paddingLeft: isMobile ? '20px' : '0px',
+          paddingRight: isMobile ? '20px' : '0px'
         }}
       >
         {/* 중앙 텍스트 */}
@@ -509,8 +529,8 @@ export default function Portfolio() {
         {/* 이미지들 */}
         <div className="relative w-full h-full">
           {images.map((img, index) => {
-            const scatteredPos = getScatteredPosition(index, images.length)
-            const linearPos = getLinearPosition(index, images.length)
+            const scatteredPos = getScatteredPosition(index)
+            const linearPos = getLinearPosition(index)
             
             return (
               <CircularImageItem
@@ -522,6 +542,7 @@ export default function Portfolio() {
                 linearPos={linearPos}
                 isMobile={isMobile}
                 isTablet={isTablet}
+                isDarkTheme={isDarkTheme}
               />
             )
           })}
@@ -561,7 +582,7 @@ export default function Portfolio() {
         }}
       >
         <motion.h1
-          className={`font-light leading-tight mb-6 md:mb-8 transition-colors duration-500 text-4xl md:text-5xl lg:text-6xl ${
+          className={`font-light leading-tight mb-4 md:mb-8 transition-colors duration-500 text-3xl md:text-5xl lg:text-6xl ${
             isDarkTheme ? "text-white" : "text-amber-900"
           }`}
           initial={{ opacity: 0, y: 40 }}
@@ -571,7 +592,7 @@ export default function Portfolio() {
           Frontend Developer
         </motion.h1>
         <motion.p
-          className={`font-light mb-4 md:mb-6 leading-relaxed transition-colors duration-500 text-lg md:text-xl ${
+          className={`font-light mb-4 md:mb-6 leading-relaxed transition-colors duration-500 text-sm md:text-xl ${
             isDarkTheme ? "text-slate-300" : "text-amber-800"
           }`}
           initial={{ opacity: 0, y: 30 }}
@@ -606,7 +627,7 @@ export default function Portfolio() {
     )
   }
 
-  const ImageSection = ({ images }) => {
+  const ImageSection = ({ images, isDarkTheme }) => {
     return (
       <motion.div
         className="w-full max-w-none mx-auto"
@@ -614,7 +635,7 @@ export default function Portfolio() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
       >
-        <CircularImageGrid images={images} />
+        <CircularImageGrid images={images} isDarkTheme={isDarkTheme} />
       </motion.div>
     )
   }
@@ -650,7 +671,7 @@ export default function Portfolio() {
           ? "bg-slate-900/95 backdrop-blur-sm" 
           : "bg-[#f5f1eb]/90 backdrop-blur-sm"
       }`}>
-        <nav className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-5 lg:py-6">
+        <nav className="max-w-7xl mx-auto px-6 lg:px-8 py-3 md:py-5 lg:py-6">
           <div className="flex justify-between items-center">
             <motion.div
               className={`text-lg md:text-xl font-light transition-colors duration-500 ${
@@ -699,17 +720,17 @@ export default function Portfolio() {
       </header>
 
       {/* Home Section */}
-      <section id="home" className="relative z-10" style={{ height: '200vh' }}>
+      <section id="home" className="relative z-10" style={{ height: '250vh' }}>
         <div className="max-w-7xl mx-auto relative z-10 w-full min-h-screen flex flex-col justify-center sticky top-0">
-          <div className="px-4 md:px-6 lg:px-8 pt-24 md:pt-28 lg:pt-32">
-            {/* 메인 텍스트 영역 - 정상 위치 */}
-            <div className="mb-8 md:mb-12 lg:mb-16">
+          <div className="px-6 lg:px-8 pt-16 md:pt-28 lg:pt-32 pb-8 md:pb-0">
+            {/* 메인 텍스트 영역 - 모바일 최적화 */}
+            <div className="mb-4 md:mb-6 lg:mb-8 mt-4 md:mt-12 lg:mt-16">
               <HomeTextContent isDarkTheme={isDarkTheme} scrollToSection={scrollToSection} />
             </div>
             
-            {/* 이미지 영역 - 텍스트 아래에 배치 */}
-            <div className="relative">
-              <ImageSection images={projectImages} />
+            {/* 이미지 영역 - 모바일에서 덜 올라가도록 조정 */}
+            <div className="relative -mt-4 md:-mt-12 lg:-mt-16">
+              <ImageSection images={projectImages} isDarkTheme={isDarkTheme} />
             </div>
           </div>
         </div>
@@ -734,7 +755,7 @@ export default function Portfolio() {
       {/* Work Experience Section */}
       <section id="work-experience" className="pt-20 md:pt-28 lg:pt-32 pb-20 md:pb-28 lg:pb-32 relative z-10">
         <AnimatedSection className="relative z-10">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="mb-12 md:mb-16 lg:mb-20">
               <h2 className={`text-3xl md:text-4xl lg:text-5xl font-light mb-4 md:mb-6 transition-colors duration-500 ${
                 isDarkTheme ? "text-white" : "text-amber-900"
@@ -765,11 +786,11 @@ export default function Portfolio() {
                   className="group cursor-pointer"
                   onClick={() => openWorkModal(exp)}
                 >
-                  <div className="backdrop-blur-sm rounded-xl md:rounded-2xl p-4 md:p-6 border bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50 hover:bg-slate-800/70 transition-all duration-300 h-full flex flex-col">
+                  <div className="backdrop-blur-sm rounded-xl md:rounded-2xl p-3 md:p-6 border bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50 hover:bg-slate-800/70 transition-all duration-300 h-full flex flex-col">
                     <div className="flex-1">
-                      <h4 className="text-lg md:text-xl font-light mb-2 md:mb-3 text-white group-hover:text-amber-400 transition-colors duration-300">{exp.title}</h4>
+                      <h4 className="text-base md:text-xl font-light mb-2 md:mb-3 text-white group-hover:text-amber-400 transition-colors duration-300">{exp.title}</h4>
                       <p className="text-xs md:text-sm mb-2 font-light text-slate-300">{exp.period}</p>
-                      <p className="text-xs md:text-sm mb-3 md:mb-4 font-light text-slate-400 line-clamp-3">{exp.role}</p>
+                      <p className="text-xs md:text-sm mb-3 md:mb-4 font-light text-slate-400 line-clamp-2 md:line-clamp-3">{exp.role}</p>
                       
                       {/* Responsive Tech tags */}
                       <div className="flex flex-wrap gap-1 md:gap-1.5 mb-3 md:mb-4">
@@ -822,7 +843,7 @@ export default function Portfolio() {
       {/* Project Section */}
       <section id="project" className="py-20 md:py-28 lg:py-32 bg-white/30 relative z-10">
         <AnimatedSection>
-          <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
             <div className="mb-12 md:mb-16 lg:mb-20">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-4 md:mb-6 text-amber-900">Featured Projects</h2>
               <div className="w-16 md:w-20 lg:w-24 h-px bg-amber-900/30"></div>
@@ -867,10 +888,10 @@ export default function Portfolio() {
                       className="space-y-6 md:space-y-8"
                     >
                       <div>
-                        <h3 className="text-2xl md:text-3xl lg:text-4xl font-light mb-4 md:mb-6 text-amber-900">
+                        <h3 className="text-xl md:text-3xl lg:text-4xl font-light mb-3 md:mb-6 text-amber-900">
                           {projects[currentProjectIndex].title}
                         </h3>
-                        <p className="text-base md:text-lg font-light leading-relaxed text-amber-700 mb-6 md:mb-8">
+                        <p className="text-sm md:text-lg font-light leading-relaxed text-amber-700 mb-4 md:mb-8">
                           {projects[currentProjectIndex].description}
                         </p>
                       </div>
@@ -959,7 +980,7 @@ export default function Portfolio() {
 
       {/* Skills Section */}
       <section id="skills" className="py-20 md:py-28 lg:py-32 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
           <motion.div 
             className="mb-12 md:mb-16 lg:mb-20"
             initial={{ opacity: 0, y: 30 }}
@@ -1023,7 +1044,7 @@ export default function Portfolio() {
 
       {/* Education Section */}
       <section id="education" className="py-20 md:py-28 lg:py-32 bg-white/30 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
           <motion.div 
             className="mb-12 md:mb-16 lg:mb-20"
             initial={{ opacity: 0, y: 30 }}
@@ -1096,7 +1117,7 @@ export default function Portfolio() {
 
       {/* Footer */}
       <footer className="py-16 md:py-20 lg:py-24 bg-amber-900 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 md:space-x-8 mb-6 md:mb-8">
             <a href="https://github.com/jangkyum" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-[#f5f1eb]/70 hover:text-[#f5f1eb] transition-colors">
               <Github className="w-4 h-4 md:w-5 md:h-5" />
