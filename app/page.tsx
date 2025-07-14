@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from "react"
 import Image from "next/image"
-import { Github, ExternalLink, FileText, ArrowUpRight, Eye, ChevronLeft, ChevronRight } from "lucide-react"
+import { Github, ExternalLink, FileText, ArrowUpRight, Eye, ChevronLeft, ChevronRight, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Modal } from "@/components/ui/modal"
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion"
@@ -13,7 +13,7 @@ export default function Portfolio() {
   const [selectedWork, setSelectedWork] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0)
-  
+
   const projectImages = [
     { src: "/img/book.jpg", alt: "📚 책이 있는 시간이 좋아요", size: { width: 190, height: 320 } },
     { src: "/img/running.jpg", alt: "🏃 몸도 마음도 가벼워지는 시간", size: { width: 190, height: 320 } },
@@ -714,6 +714,26 @@ export default function Portfolio() {
                   {item.label}
                 </motion.button>
               ))}
+              
+              {/* PDF 다운로드 버튼 */}
+              <motion.a
+                href="/resume.pdf"
+                download="김장겸-이력서.pdf"
+                className={`flex items-center space-x-1 text-sm font-light transition-colors duration-500 ${
+                  isDarkTheme ? "text-slate-300 hover:text-amber-400" : "text-amber-700 hover:text-amber-900"
+                }`}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                whileHover={{ 
+                  y: -1,
+                  transition: { duration: 0.15, ease: "easeOut" }
+                }}
+                title="이력서 PDF 다운로드"
+              >
+                <Download className="w-3 h-3" />
+                <span>PDF</span>
+              </motion.a>
             </div>
           </div>
         </nav>
@@ -843,7 +863,7 @@ export default function Portfolio() {
       {/* Project Section */}
       <section id="project" className="py-20 md:py-28 lg:py-32 bg-white/30 relative z-10">
         <AnimatedSection>
-          <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="mb-12 md:mb-16 lg:mb-20">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light mb-4 md:mb-6 text-amber-900">Featured Projects</h2>
               <div className="w-16 md:w-20 lg:w-24 h-px bg-amber-900/30"></div>
@@ -980,7 +1000,7 @@ export default function Portfolio() {
 
       {/* Skills Section */}
       <section id="skills" className="py-20 md:py-28 lg:py-32 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div 
             className="mb-12 md:mb-16 lg:mb-20"
             initial={{ opacity: 0, y: 30 }}
@@ -1044,7 +1064,7 @@ export default function Portfolio() {
 
       {/* Education Section */}
       <section id="education" className="py-20 md:py-28 lg:py-32 bg-white/30 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <motion.div 
             className="mb-12 md:mb-16 lg:mb-20"
             initial={{ opacity: 0, y: 30 }}
@@ -1116,8 +1136,8 @@ export default function Portfolio() {
       </section>
 
       {/* Footer */}
-      <footer className="py-16 md:py-20 lg:py-24 bg-amber-900 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 md:px-6 lg:px-8">
+      <footer id="footer-section" className="py-16 md:py-20 lg:py-24 bg-amber-900 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 md:space-x-8 mb-6 md:mb-8">
             <a href="https://github.com/jangkyum" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-[#f5f1eb]/70 hover:text-[#f5f1eb] transition-colors">
               <Github className="w-4 h-4 md:w-5 md:h-5" />
