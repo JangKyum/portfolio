@@ -24,6 +24,24 @@ export default function Portfolio() {
 
   const projects = [
     {
+      title: "Pik2(밸런스 게임)",
+      description: "두 가지 선택지 중 하나를 골라 다른 사람들과 비교할 수 있는 인터랙티브 웹 게임입니다. 다양한 카테고리의 질문을 통해 재미있고 의미 있는 선택의 순간을 제공하며, Recharts를 활용한 투표 결과 시각화와 Supabase를 통한 실시간 데이터베이스 연동으로 사용자들의 선택을 실시간으로 확인할 수 있습니다.",
+      image: "/img/pik2.png",
+      tech: [
+        "Next.js 15",
+        "TypeScript",
+        "Tailwind",
+        "Shadcn UI",
+        "Radix UI",
+        "Framer Motion",
+        "React Hook Form",
+        "Zod",
+        "Supabase",
+        "Recharts"
+      ],
+      link: "https://pik2.vercel.app/"
+    },
+    {
       title: "개인 블로그 플랫폼",
       description: "Next.js 15와 TypeScript 기반의 현대적인 개인 블로그 플랫폼입니다. React Markdown을 활용한 마크다운 기반 글 작성, 실시간 미리보기, 조회수 추적, 태그 시스템을 지원합니다. Supabase를 통한 안정적인 데이터 관리와 SEO 최적화, 반응형 디자인 지원으로 최적의 사용자 경험을 제공합니다.",
       image: "/img/jkblog.png",
@@ -39,22 +57,22 @@ export default function Portfolio() {
       link: "https://codedot-blog.vercel.app/",
     },
     {
-  title: "Haru Class",
-  description: "소규모 학원 및 개인 교습소 관리 웹 애플리케이션입니다. 출결 관리, 공지사항 전송, 학부모 소통을 하나의 플랫폼에서 효율적으로 처리할 수 있으며, 관리자와 학생/학부모를 위한 별도의 인터페이스를 제공합니다. Shadcn UI와 Radix UI를 활용한 모던한 디자인과 반응형 레이아웃으로 모바일 환경에 최적화되어 있으며, React Hook Form과 Zod를 통한 강력한 폼 유효성 검사를 구현했습니다.",
-  image: "/img/haru-class.png",
-  tech: [
-    "Next.js 15 (App Router)",
-    "TypeScript", 
-    "Tailwind CSS",
-    "Shadcn UI",
-    "Radix UI",
-    "React Hook Form",
-    "date-fns",
-    "Recharts",
-    "Zod"
-  ],
-  link: "https://haru-class.vercel.app/"
-},
+      title: "Haru Class",
+      description: "소규모 학원 및 개인 교습소 관리 웹 애플리케이션입니다. 출결 관리, 공지사항 전송, 학부모 소통을 하나의 플랫폼에서 효율적으로 처리할 수 있으며, 관리자와 학생/학부모를 위한 별도의 인터페이스를 제공합니다. Shadcn UI와 Radix UI를 활용한 모던한 디자인과 반응형 레이아웃으로 모바일 환경에 최적화되어 있으며, React Hook Form과 Zod를 통한 강력한 폼 유효성 검사를 구현했습니다.",
+      image: "/img/haru-class.png",
+      tech: [
+        "Next.js 15 (App Router)",
+        "TypeScript", 
+        "Tailwind CSS",
+        "Shadcn UI",
+        "Radix UI",
+        "React Hook Form",
+        "date-fns",
+        "Recharts",
+        "Zod"
+      ],
+      link: "https://haru-class.vercel.app/"
+    },
     {
       title: "Resume",
       description: "HTML5, CSS3, JavaScript 기반의 반응형 개인 Resume 웹사이트입니다. 프론트엔드 개발자로서의 경력과 기술 스택을 효과적으로 소개하며, 깔끔한 UI/UX와 모바일 최적화를 통해 전문적인 개발자 이미지를 구축합니다. CSS 변수 시스템과 미디어 쿼리를 활용한 현대적인 웹 표준을 준수합니다.",
