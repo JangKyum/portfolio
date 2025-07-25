@@ -1,7 +1,8 @@
 # 포트폴리오 웹사이트
 
 Next.js와 Framer Motion을 활용한 인터랙티브한 프론트엔드 개발자 포트폴리오 웹사이트입니다.
-- 포트폴리오 링크: [https://jk-pf.vercel.app/]
+
+[👉 포트폴리오 사이트 바로가기](https://jk-pf.vercel.app)
 
 ## 🌟 주요 특징
 
