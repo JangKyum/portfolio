@@ -176,7 +176,7 @@ export default function Portfolio() {
         "컴포넌트 분리 및 재사용: Angular + RxJS 기반의 상태 관리 체계를 설계하고, 점검 항목 컴포넌트를 독립화해 유지보수성과 확장성 확보.",
       ],
       tech: "Angular, RxJS, Ng-Zorro (Ant Design for Angular), Figma",
-      link: "https://www.notion.so/CIS-1e76aba52d458062b9eee26179b644e7?pvs=21",
+      link: "https://example.com",
     },
     {
       title: "KICE(교육데이터 플랫폼)",
@@ -202,7 +202,7 @@ export default function Portfolio() {
         "REST API 설계 협업 및 Ant Design/PrimeNG UI 컴포넌트구현"
       ],
       tech: "Angular, PrimeNg, Ant Design(Ng-Zorro)",
-      link: "https://www.notion.so/31f679ad3c8447dc8d771d62b078ff74?pvs=21",
+      link: "https://example.com",
     },
     {
       title: "삼성화재(Biz룰 모니터링 시스템)",
@@ -1163,7 +1163,7 @@ export default function Portfolio() {
             </a>
             <a href="https://github.com/codedot28" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-2 text-[#f5f1eb]/50 hover:text-[#f5f1eb] transition-colors">
               <Github className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="text-xs md:text-sm">Past Projects</span>
+              <span className="text-xs md:text-sm">Sub GitHub</span>
             </a>
             <a
               href="https://codedot-blog.vercel.app/"
@@ -1173,7 +1173,7 @@ export default function Portfolio() {
             >
               <FileText className="w-5 h-5 md:w-6 md:h-6" />
             </a>
-            <a
+            {/* <a
               href="https://www.notion.so/Develop-List-43a42ab9966f4e068f57058d7b50b725"
               target="_blank"
               rel="noopener noreferrer"
@@ -1182,7 +1182,7 @@ export default function Portfolio() {
               <svg className="w-5 h-5 md:w-6 md:h-6 fill-current" viewBox="0 0 24 24">
                 <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466l1.823 1.447zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933l3.268-.186z" />
               </svg>
-            </a>
+            </a> */}
           </div>
           <div className="text-center text-[#f5f1eb]/50 font-light text-xs md:text-sm">© 2025 KIM JANGKYUM. All rights reserved.</div>
         </div>
