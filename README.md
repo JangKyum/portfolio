@@ -1,6 +1,7 @@
 # 포트폴리오 웹사이트
 
 Next.js와 Framer Motion을 활용한 인터랙티브한 프론트엔드 개발자 포트폴리오 웹사이트입니다.
+- 포트폴리오 링크: [https://jk-pf.vercel.app/]
 
 ## 🌟 주요 특징
 
@@ -130,21 +131,12 @@ style={{
 - Desktop: 1024px ~
 ```
 
-## 🌐 배포
-
-이 프로젝트는 Vercel에 최적화되어 있으며, 다음 플랫폼에서 배포 가능합니다:
-
-- **Vercel** (권장)
-- **Netlify**
-- **GitHub Pages**
-
 ## 📝 라이선스
 
 © 2025 KIM JANGKYUM. All rights reserved.
 
 ---
-
-**개발자**: 김장겸 (KIM JANGKYUM)  
+ 
 **이메일**: [codedot28@gmail.com]  
 **GitHub**: [https://github.com/JangKyum]  
 **Blog**: [https://codedot-blog.vercel.app/]
